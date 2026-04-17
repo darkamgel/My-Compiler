@@ -1,0 +1,11 @@
+// Sample program for the TOC compiler project
+
+let x = 10 + 20;
+let y = x * 3;
+print(y);
+
+y = y - 15;
+print(y);
+
+let z = (y + 5) / 2;
+print(z);
