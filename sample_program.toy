@@ -1,11 +1,28 @@
-// Sample program for the TOC compiler project
+// Demonstration program for the upgraded TOC toy compiler
 
-let x = 10 + 20;
-let y = x * 3;
-print(y);
+let x = 5;
+let y = 10;
+let sum = 0;
 
-y = y - 15;
-print(y);
+// if / else using comparison operators
+if (x < y) {
+    print(x);
+} else {
+    print(y);
+}
 
-let z = (y + 5) / 2;
-print(z);
+// while loop
+while (x <= y) {
+    sum = sum + x;
+    x = x + 1;
+}
+
+// print the final sum
+print(sum);
+
+// another condition
+if (sum == 45) {
+    print(sum);
+} else {
+    print(0);
+}

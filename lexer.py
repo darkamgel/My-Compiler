@@ -7,10 +7,12 @@ class Lexer:
     Lexical analyzer:
     Converts source code into tokens.
 
-    This stage is based on regular languages / finite automata.
+    TOC link:
+    Token recognition is based on regular-language style patterns,
+    which connect naturally to finite automata.
     """
 
-    KEYWORDS = {"let", "print"}
+    KEYWORDS = {"let", "print", "if", "else", "while"}
 
     def __init__(self, text: str):
         self.text = text
@@ -35,7 +37,6 @@ class Lexer:
             self.advance()
 
     def skip_comment(self):
-        # supports // comment
         while self.current_char is not None and self.current_char != "\n":
             self.advance()
 
@@ -90,6 +91,32 @@ class Lexer:
             if self.current_char.isdigit():
                 return self.number()
 
+            # two-character operators
+            if self.current_char == "=" and self.peek() == "=":
+                pos = self.pos
+                self.advance()
+                self.advance()
+                return Token("EQ", "==", pos)
+
+            if self.current_char == "!" and self.peek() == "=":
+                pos = self.pos
+                self.advance()
+                self.advance()
+                return Token("NE", "!=", pos)
+
+            if self.current_char == "<" and self.peek() == "=":
+                pos = self.pos
+                self.advance()
+                self.advance()
+                return Token("LE", "<=", pos)
+
+            if self.current_char == ">" and self.peek() == "=":
+                pos = self.pos
+                self.advance()
+                self.advance()
+                return Token("GE", ">=", pos)
+
+            # single-character tokens
             if self.current_char == "+":
                 pos = self.pos
                 self.advance()
@@ -115,6 +142,16 @@ class Lexer:
                 self.advance()
                 return Token("ASSIGN", "=", pos)
 
+            if self.current_char == "<":
+                pos = self.pos
+                self.advance()
+                return Token("LT", "<", pos)
+
+            if self.current_char == ">":
+                pos = self.pos
+                self.advance()
+                return Token("GT", ">", pos)
+
             if self.current_char == "(":
                 pos = self.pos
                 self.advance()
@@ -124,6 +161,16 @@ class Lexer:
                 pos = self.pos
                 self.advance()
                 return Token("RPAREN", ")", pos)
+
+            if self.current_char == "{":
+                pos = self.pos
+                self.advance()
+                return Token("LBRACE", "{", pos)
+
+            if self.current_char == "}":
+                pos = self.pos
+                self.advance()
+                return Token("RBRACE", "}", pos)
 
             if self.current_char == ";":
                 pos = self.pos

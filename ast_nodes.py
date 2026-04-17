@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 
 class ASTNode:
@@ -8,6 +8,11 @@ class ASTNode:
 
 @dataclass
 class Program(ASTNode):
+    statements: List[ASTNode]
+
+
+@dataclass
+class Block(ASTNode):
     statements: List[ASTNode]
 
 
@@ -49,3 +54,16 @@ class AssignStatement(ASTNode):
 @dataclass
 class PrintStatement(ASTNode):
     expr: ASTNode
+
+
+@dataclass
+class IfStatement(ASTNode):
+    condition: ASTNode
+    then_branch: Block
+    else_branch: Optional[Block]
+
+
+@dataclass
+class WhileStatement(ASTNode):
+    condition: ASTNode
+    body: Block
