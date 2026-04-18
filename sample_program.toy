@@ -1,28 +1,33 @@
-// Demonstration program for the upgraded TOC toy compiler
+// Extended demo program
 
-let x = 5;
-let y = 10;
-let sum = 0;
+let name = input("Enter your name: ");
+let age = input("Enter your age: ");
 
-// if / else using comparison operators
-if (x < y) {
-    print(x);
+print("Hello, " + name);
+
+if ((age >= 18) && (age < 100)) {
+    print("You are an adult.");
 } else {
-    print(y);
+    print("You are not an adult.");
 }
+
+let total = 0;
+
+// for loop
+for (let i = 1; i <= 5; i = i + 1) {
+    total = total + i;
+}
+
+print("Sum from 1 to 5 = " + total);
 
 // while loop
-while (x <= y) {
-    sum = sum + x;
-    x = x + 1;
+let counter = 3;
+while ((counter > 0) || (name == "")) {
+    print("Counter = " + counter);
+    counter = counter - 1;
 }
 
-// print the final sum
-print(sum);
-
-// another condition
-if (sum == 45) {
-    print(sum);
-} else {
-    print(0);
+// boolean not
+if (!(age == 0)) {
+    print("Age is not zero.");
 }

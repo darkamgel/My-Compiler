@@ -1,18 +1,32 @@
+"""
+Lexer implementation for the toy programming language.
+
+This module performs lexical analysis by reading the raw source code
+character by character and converting it into a sequence of tokens
+that can be used by the parser. It identifies keywords, identifiers,
+numbers, strings, operators, punctuation symbols, and comments.
+
+Key responsibilities:
+- Skip whitespace and single-line comments
+- Recognize language keywords such as let, print, if, else, while, for, and input
+- Parse identifiers and numeric literals
+- Handle string literals with basic escape sequences
+- Detect single-character and multi-character operators
+- Raise clear lexical errors for invalid or unexpected input
+
+The lexer acts as the first stage of the compiler/interpreter pipeline:
+    Source Code → Lexer → Tokens → Parser
+
+This module helps ensure that the input program is broken into
+well-structured token units before syntax analysis begins.
+"""
+
 from tokens import Token
 from errors import LexerError
 
 
 class Lexer:
-    """
-    Lexical analyzer:
-    Converts source code into tokens.
-
-    TOC link:
-    Token recognition is based on regular-language style patterns,
-    which connect naturally to finite automata.
-    """
-
-    KEYWORDS = {"let", "print", "if", "else", "while"}
+    KEYWORDS = {"let", "print", "if", "else", "while", "for", "input"}
 
     def __init__(self, text: str):
         self.text = text
@@ -73,6 +87,33 @@ class Lexer:
             return Token(result.upper(), result, start_pos)
         return Token("IDENTIFIER", result, start_pos)
 
+    def string(self):
+        start_pos = self.pos
+        self.advance()  # skip opening quote
+        result = ""
+
+        while self.current_char is not None and self.current_char != '"':
+            if self.current_char == "\\":
+                self.advance()
+                if self.current_char is None:
+                    raise LexerError(f"Unterminated string at position {start_pos}")
+                escapes = {
+                    "n": "\n",
+                    "t": "\t",
+                    '"': '"',
+                    "\\": "\\",
+                }
+                result += escapes.get(self.current_char, self.current_char)
+            else:
+                result += self.current_char
+            self.advance()
+
+        if self.current_char != '"':
+            raise LexerError(f"Unterminated string at position {start_pos}")
+
+        self.advance()  # skip closing quote
+        return Token("STRING", result, start_pos)
+
     def get_next_token(self):
         while self.current_char is not None:
             if self.current_char.isspace():
@@ -91,7 +132,10 @@ class Lexer:
             if self.current_char.isdigit():
                 return self.number()
 
-            # two-character operators
+            if self.current_char == '"':
+                return self.string()
+
+            # two-char operators
             if self.current_char == "=" and self.peek() == "=":
                 pos = self.pos
                 self.advance()
@@ -116,66 +160,41 @@ class Lexer:
                 self.advance()
                 return Token("GE", ">=", pos)
 
-            # single-character tokens
-            if self.current_char == "+":
+            if self.current_char == "&" and self.peek() == "&":
                 pos = self.pos
                 self.advance()
-                return Token("PLUS", "+", pos)
+                self.advance()
+                return Token("AND", "&&", pos)
 
-            if self.current_char == "-":
+            if self.current_char == "|" and self.peek() == "|":
                 pos = self.pos
                 self.advance()
-                return Token("MINUS", "-", pos)
+                self.advance()
+                return Token("OR", "||", pos)
 
-            if self.current_char == "*":
-                pos = self.pos
-                self.advance()
-                return Token("MULTIPLY", "*", pos)
+            # single-char tokens
+            single_map = {
+                "+": "PLUS",
+                "-": "MINUS",
+                "*": "MULTIPLY",
+                "/": "DIVIDE",
+                "=": "ASSIGN",
+                "<": "LT",
+                ">": "GT",
+                "!": "NOT",
+                "(": "LPAREN",
+                ")": "RPAREN",
+                "{": "LBRACE",
+                "}": "RBRACE",
+                ";": "SEMICOLON",
+                ",": "COMMA",
+            }
 
-            if self.current_char == "/":
+            if self.current_char in single_map:
                 pos = self.pos
+                ch = self.current_char
                 self.advance()
-                return Token("DIVIDE", "/", pos)
-
-            if self.current_char == "=":
-                pos = self.pos
-                self.advance()
-                return Token("ASSIGN", "=", pos)
-
-            if self.current_char == "<":
-                pos = self.pos
-                self.advance()
-                return Token("LT", "<", pos)
-
-            if self.current_char == ">":
-                pos = self.pos
-                self.advance()
-                return Token("GT", ">", pos)
-
-            if self.current_char == "(":
-                pos = self.pos
-                self.advance()
-                return Token("LPAREN", "(", pos)
-
-            if self.current_char == ")":
-                pos = self.pos
-                self.advance()
-                return Token("RPAREN", ")", pos)
-
-            if self.current_char == "{":
-                pos = self.pos
-                self.advance()
-                return Token("LBRACE", "{", pos)
-
-            if self.current_char == "}":
-                pos = self.pos
-                self.advance()
-                return Token("RBRACE", "}", pos)
-
-            if self.current_char == ";":
-                pos = self.pos
-                self.advance()
-                return Token("SEMICOLON", ";", pos)
+                return Token(single_map[ch], ch, pos)
 
             raise LexerError(
                 f"Unexpected character '{self.current_char}' at position {self.pos}"
